@@ -5,11 +5,16 @@ class postStorage {
   static async findAllByPosts() {
     try {
       const query = `
-        select users.no AS userNo, boards.no AS boardNo, boards.title, boards.description, DATE_FORMAT(boards.in_date,'%m/%d %H:%i') AS inDate, DATE_FORMAT(boards.modify_date,'%m/%d %H:%i') AS modifyDate, (SELECT count(*) FROM comments where comments.board_no = boards.no) AS comments_length, boards.hit, users.nickname, users.id
-        from boards
-        left join users
-        on boards.user_no = users.no;`;
-      return await db.query(query);
+      select posts.no,posts.user_no, GROUP_CONCAT(images.image_url) AS images, posts.content, posts.created_date, users.nickname 
+      from posts
+      LEFT JOIN users
+      on users.no = posts.user_no
+        LEFT JOIN images
+        ON images.post_no = posts.no
+      GROUP BY posts.no;`;
+      const posts = await db.query(query);
+
+      return posts[n];
     } catch (err) {
       throw {
         msg: "게시글 전체조회 오류입니다. 서버개발자에게 문의해주세요.",
@@ -17,15 +22,16 @@ class postStorage {
     }
   }
 
-  static async createPost({ user_no, content }) {
+  static async createPost(data) {
     try {
       const query = `insert into posts(user_no, content) values(?, ?)`;
-      const response = await db.query(query, [user_no, content]);
+      const response = await db.query(query, [data.user_no, data.content]);
       return response;
     } catch (err) {
       throw { msg: `${err} : 게시글 생성 오류입니다, 서버 개발자에게 문의해주세요` };
     }
   }
+
   static async createImage(post_no, image_url, order_no) {
     try {
       const query = `insert into images(post_no, image_url, order_no) values(?, ?, ?);`;
@@ -35,6 +41,7 @@ class postStorage {
       throw { msg: `${err} : 이미지 생성 오류입니다, 서버 개발자에게 문의해주세요` };
     }
   }
+
   static async updatePost(no, { content }) {
     try {
       const query = `update posts set content = ? where no = ?`;
@@ -42,6 +49,17 @@ class postStorage {
       return response;
     } catch (err) {
       throw { msg: `${err} : 게시글 수정 오류입니다, 서버 개발자에게 문의해주세요` };
+    }
+  }
+
+  static async deletePost(postNo) {
+    try {
+      const query = `delete from posts where no = ? `;
+      const response = await db.query(query, [postNo]);
+
+      return response;
+    } catch (err) {
+      throw { msg: `${err} : 게시글 삭제 오류입니다, 서버 개발자에게 문의해주세요` };
     }
   }
 }

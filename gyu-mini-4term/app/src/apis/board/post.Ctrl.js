@@ -1,7 +1,6 @@
 "use strict";
 
 const { json } = require("express");
-// const { mountpath } = require("../../../app");
 const Post = require("../../models/services/Post/Post");
 const Posts = require("../../models/services/Post/Post");
 const { connectPost } = require("../../models/services/Post/PostStorage");
@@ -53,6 +52,40 @@ const process = {
     try {
       const post = new Posts(req);
       const response = await post.updatePost(req);
+
+      if (response.success) {
+        logger.info(`POST /connect 201 ${response.success} ${response.msg}`);
+        return res.status(201).json(response);
+      } else {
+        logger.error(`POST /connect 400  ${response.success} ${response.msg}`);
+        return res.status(400).json(response);
+      }
+    } catch (err) {
+      throw res.status(500).json(err);
+    }
+  },
+
+  deletePost: async (req, res) => {
+    try {
+      const post = new Posts(req);
+      const response = await post.deletePost(req);
+
+      if (response.success) {
+        logger.info(`POST /connect 201 ${response.success} ${response.msg}`);
+        return res.status(201).json(response);
+      } else {
+        logger.error(`POST /connect 400  ${response.success} ${response.msg}`);
+        return res.status(400).json(response);
+      }
+    } catch (err) {
+      throw res.status(500).json(err);
+    }
+  },
+
+  findAllByPosts: async (req, res) => {
+    try {
+      const post = new Posts(req);
+      const response = await post.findAllByPosts(req);
 
       if (response.success) {
         logger.info(`POST /connect 201 ${response.success} ${response.msg}`);

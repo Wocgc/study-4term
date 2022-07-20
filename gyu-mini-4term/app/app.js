@@ -7,7 +7,6 @@ const morgan = require("morgan");
 
 const app = express();
 dotenv.config();
-// const mariadb = require("./src/apis/config/mariadb");
 
 const board = require("./src/apis/board");
 
